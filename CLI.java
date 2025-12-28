@@ -1,7 +1,48 @@
 import java.util.List;
 
+/**
+ * La classe CLI fournit une interface en ligne de commande pour :
+ * <ul>
+ *   <li>analyser un fichier MP3 et afficher ses métadonnées</li>
+ *   <li>explorer un dossier contenant des MP3 et générer une playlist</li>
+ * </ul>
+ *
+ * <p>
+ * Modes disponibles :
+ * </p>
+ * <ul>
+ *   <li><b>-f</b> : analyse un fichier MP3</li>
+ *   <li><b>-d</b> : analyse un dossier et peut générer une playlist</li>
+ * </ul>
+ *
+ * <p>
+ * Formats de playlist (mode dossier) :
+ * </p>
+ * <ul>
+ *   <li><b>--m3u8</b> (défaut)</li>
+ *   <li><b>--xspf</b></li>
+ *   <li><b>--jspf</b></li>
+ * </ul>
+ *
+ * <p>
+ * Option de sortie :
+ * </p>
+ * <ul>
+ *   <li><b>-o &lt;fichier&gt;</b> : chemin du fichier de playlist généré</li>
+ * </ul>
+ *
+ * @author nina
+ * @version 1.0
+ */
 public class CLI {
 
+    /**
+     * Point d'entrée du programme.
+     * Interprète les arguments et déclenche soit l'analyse d'un fichier MP3,
+     * soit l'exploration d'un dossier et la génération d'une playlist.
+     *
+     * @param args arguments de la ligne de commande
+     */
     public static void main(String[] args) {
 
         if (args.length == 0) {
@@ -47,9 +88,11 @@ public class CLI {
         }
     }
 
-    /* =======================
-       MODE FICHIER (-f)
-       ======================= */
+    /**
+     * Analyse un fichier MP3 et affiche ses métadonnées (titre, artiste, album, année, durée).
+     *
+     * @param chemin chemin du fichier MP3 à analyser
+     */
     private static void analyserFichierMP3(String chemin) {
         System.out.println("Analyse du fichier MP3 : " + chemin);
 
@@ -64,9 +107,14 @@ public class CLI {
         System.out.println("Durée   : " + formatDuree(meta.getDuree()));
     }
 
-    /* =======================
-       MODE DOSSIER (-d)
-       ======================= */
+    /**
+     * Explore un dossier pour récupérer les fichiers MP3 et génère une playlist
+     * dans le format demandé.
+     *
+     * @param dossier chemin du dossier à analyser
+     * @param fichierSortie chemin du fichier de sortie (peut être {@code null} si non fourni)
+     * @param typePlaylist type de playlist ("m3u8", "xspf" ou "jspf")
+     */
     private static void genererPlaylist(String dossier,
                                         String fichierSortie,
                                         String typePlaylist) {
@@ -111,18 +159,28 @@ public class CLI {
         }
     }
 
-    /* =======================
-       OPTIONS LONGUES
-       ======================= */
+    /**
+     * Détecte le format de playlist à générer selon les options longues.
+     * <p>
+     * Par défaut, retourne "m3u8" si aucun format explicite n'est fourni.
+     * </p>
+     *
+     * @param args arguments de la ligne de commande
+     * @return "xspf", "jspf" ou "m3u8" (par défaut)
+     */
     private static String detecterTypePlaylist(String[] args) {
         if (contient(args, "--xspf")) return "xspf";
         if (contient(args, "--jspf")) return "jspf";
         return "m3u8"; // défaut
     }
 
-    /* =======================
-       OUTILS
-       ======================= */
+    /**
+     * Indique si une option est présente dans la liste d'arguments.
+     *
+     * @param args tableau d'arguments
+     * @param option option recherchée
+     * @return {@code true} si l'option est présente, sinon {@code false}
+     */
     private static boolean contient(String[] args, String option) {
         for (String s : args) {
             if (s.equals(option)) return true;
@@ -130,6 +188,16 @@ public class CLI {
         return false;
     }
 
+    /**
+     * Renvoie la valeur située juste après une option donnée.
+     * <p>
+     * Exemple : avec {@code -f song.mp3}, la valeur après {@code -f} est {@code song.mp3}.
+     * </p>
+     *
+     * @param args tableau d'arguments
+     * @param option option recherchée
+     * @return la valeur après l'option, ou {@code null} si absente
+     */
     private static String valeurApresOption(String[] args, String option) {
         for (int i = 0; i < args.length - 1; i++) {
             if (args[i].equals(option)) {
@@ -139,10 +207,22 @@ public class CLI {
         return null;
     }
 
+    /**
+     * Remplace une chaîne vide ou nulle par "Inconnu".
+     *
+     * @param s chaîne à vérifier
+     * @return {@code s} si elle est non vide, sinon "Inconnu"
+     */
     private static String valeur(String s) {
         return (s == null || s.isEmpty()) ? "Inconnu" : s;
     }
 
+    /**
+     * Formate une durée en secondes au format mm:ss.
+     *
+     * @param secondes durée en secondes
+     * @return durée formatée en mm:ss, ou "Inconnue" si la durée est invalide
+     */
     private static String formatDuree(long secondes) {
         if (secondes <= 0) return "Inconnue";
         long min = secondes / 60;
@@ -150,11 +230,19 @@ public class CLI {
         return String.format("%02d:%02d", min, sec);
     }
 
+    /**
+     * Affiche un message d'erreur standard et invite à utiliser l'aide.
+     *
+     * @param message message d'erreur
+     */
     private static void erreur(String message) {
         System.out.println("Erreur : " + message);
         System.out.println("Utilisez -h pour afficher l'aide.");
     }
 
+    /**
+     * Affiche l'aide d'utilisation de la commande et des options disponibles.
+     */
     private static void afficherAide() {
         System.out.println("UTILISATION :");
         System.out.println(" java CLI -f <fichier.mp3>");
@@ -174,3 +262,4 @@ public class CLI {
         System.out.println(" java CLI -d Music --xspf -o playlist.xspf");
     }
 }
+
